@@ -1,0 +1,1904 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>
+      Depot Operations | Login Trial Prototype v6 — Escalation Matrix
+    </title>
+    <style>
+      :root {
+        --navy: #152b49;
+        --blue: #245ea8;
+        --bg: #f3f6fa;
+        --ink: #172337;
+        --muted: #66758a;
+        --line: #dfe6ef;
+        --white: #fff;
+        --green: #177245;
+        --amber: #946200;
+        --red: #b42318;
+        --pale: #eaf1fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.45 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      header {
+        background: var(--navy);
+        color: #fff;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      header h1 {
+        font-size: 19px;
+        margin: 0;
+        font-weight: 700;
+      }
+      header p {
+        margin: 3px 0 0;
+        color: #d1dceb;
+        font-size: 12px;
+      }
+      .head-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      select,
+      input,
+      textarea,
+      button {
+        font: inherit;
+      }
+      select,
+      input,
+      textarea {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 9px 10px;
+        background: #fff;
+        color: var(--ink);
+        max-width: 100%;
+      }
+      button {
+        border: 0;
+        border-radius: 8px;
+        padding: 9px 13px;
+        cursor: pointer;
+        font-weight: 650;
+        background: var(--blue);
+        color: #fff;
+      }
+      button.secondary {
+        background: #e9eef5;
+        color: #26364d;
+      }
+      button.danger {
+        background: #fff0ee;
+        color: var(--red);
+        border: 1px solid #f0c4bf;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        min-height: calc(100vh - 75px);
+      }
+      aside {
+        background: #fff;
+        border-right: 1px solid var(--line);
+        padding: 18px 12px;
+      }
+      .navbtn {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        color: #34445c;
+        margin: 3px 0;
+        font-weight: 600;
+      }
+      .navbtn.active,
+      .navbtn:hover {
+        background: var(--pale);
+        color: var(--blue);
+      }
+      .navlabel {
+        font-size: 10px;
+        color: #8a97a9;
+        font-weight: 800;
+        letter-spacing: 1px;
+        padding: 18px 10px 5px;
+      }
+      .main {
+        padding: 24px;
+        max-width: 1500px;
+        width: 100%;
+        margin: auto;
+      }
+      .title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .title-row h2 {
+        margin: 0;
+        font-size: 24px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .card,
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 17px;
+        box-shadow: 0 2px 8px #20395a08;
+      }
+      .metric-label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .metric {
+        font-size: 28px;
+        font-weight: 750;
+        margin-top: 7px;
+      }
+      .metric-note {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .panel {
+        margin-bottom: 16px;
+      }
+      .panel h3 {
+        margin: 0 0 14px;
+        font-size: 16px;
+      }
+      .table-wrap {
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 11px 10px;
+        border-bottom: 1px solid #edf0f5;
+        vertical-align: top;
+      }
+      th {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #66758a;
+        background: #f9fbfd;
+      }
+      td {
+        font-size: 13px;
+      }
+      .tag {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 750;
+        background: #edf1f6;
+        color: #43536a;
+        white-space: nowrap;
+      }
+      .tag.green {
+        background: #e7f6ee;
+        color: var(--green);
+      }
+      .tag.amber {
+        background: #fff4d9;
+        color: var(--amber);
+      }
+      .tag.red {
+        background: #ffebe8;
+        color: var(--red);
+      }
+      .tag.blue {
+        background: #e8f1ff;
+        color: #245ea8;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .actions button {
+        padding: 6px 9px;
+        font-size: 11px;
+      }
+      .formgrid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 13px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .field label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #47566b;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+      }
+      .field.full {
+        grid-column: 1/-1;
+      }
+      .help {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .notice {
+        padding: 12px 14px;
+        border-radius: 9px;
+        background: #fff8e7;
+        border: 1px solid #f1dfa9;
+        color: #765400;
+        font-size: 12px;
+        margin-bottom: 15px;
+      }
+      .empty {
+        padding: 25px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .filterbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 13px;
+      }
+      .filterbar input {
+        min-width: 220px;
+      }
+      .small {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .footer {
+        font-size: 11px;
+        color: var(--muted);
+        padding: 10px 0 22px;
+      }
+      .checkline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkline input {
+        width: auto;
+      }
+      .toast {
+        position: fixed;
+        bottom: 18px;
+        right: 18px;
+        background: #172337;
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 9px;
+        box-shadow: 0 6px 25px #0002;
+        display: none;
+        max-width: 360px;
+        z-index: 20;
+      }
+      .pillrow {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+      }
+      .pillrow span {
+        background: #f0f4f9;
+        border-radius: 7px;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+      .role-note {
+        font-size: 11px;
+        color: #e0e9f5;
+      }
+      .mobile-menu {
+        display: none;
+      }
+      .login-screen {
+        min-height: calc(100vh - 75px);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 36px 16px;
+      }
+      .login-card {
+        width: min(520px, 100%);
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 8px 28px #20395a12;
+      }
+      .login-card h2 {
+        margin: 0 0 5px;
+        font-size: 23px;
+      }
+      .login-card .field input {
+        width: 100%;
+      }
+      .login-error {
+        color: var(--red);
+        font-size: 12px;
+        min-height: 18px;
+      }
+      .login-card table {
+        font-size: 12px;
+      }
+      .login-card td,
+      .login-card th {
+        padding: 7px 6px;
+      }
+      @media (max-width: 850px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+          display: flex;
+          gap: 5px;
+          overflow: auto;
+          padding: 8px;
+        }
+        .navlabel {
+          display: none;
+        }
+        .navbtn {
+          white-space: nowrap;
+          width: auto;
+          margin: 0;
+        }
+        .main {
+          padding: 15px;
+        }
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .formgrid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .title-row h2 {
+          font-size: 21px;
+        }
+      }
+      @media (max-width: 520px) {
+        header {
+          padding: 14px;
+        }
+        .cards {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .card {
+          padding: 12px;
+        }
+        .metric {
+          font-size: 23px;
+        }
+        .formgrid {
+          grid-template-columns: 1fr;
+        }
+        .field.full {
+          grid-column: auto;
+        }
+        .head-controls {
+          width: 100%;
+        }
+        .head-controls select {
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Depot Operations</h1>
+        <p>
+          Housekeeping · Hygiene · Safety · Security | Module 1 Login Trial v7 —
+          Evidence & Reporting
+        </p>
+      </div>
+      <div class="head-controls" id="sessionControls" style="display: none">
+        <span class="role-note" id="sessionLabel"></span
+        ><button class="secondary" id="logoutBtn">Log out</button
+        ><button class="secondary" id="resetBtn">Reset demo</button>
+      </div>
+    </header>
+    <div id="loginScreen" class="login-screen">
+      <div class="login-card">
+        <h2>Sign in to Depot Operations</h2>
+        <p class="sub">
+          Use a sample account to test the employee → supervisor → administrator
+          workflow.
+        </p>
+        <form id="loginForm">
+          <div class="field">
+            <label for="username">Username / Employee ID</label
+            ><input
+              id="username"
+              autocomplete="username"
+              required
+              placeholder="e.g. EMP001"
+            />
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label for="password">Password</label
+            ><input
+              id="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="Enter trial password"
+            />
+          </div>
+          <p id="loginError" class="login-error" role="alert"></p>
+          <button type="submit" style="width: 100%; margin-top: 8px">
+            Log in
+          </button>
+        </form>
+        <div class="notice" style="margin-top: 16px; margin-bottom: 0">
+          <b>Trial-only authentication:</b> this login is simulated in your
+          browser. It is not secure authentication and must not be used for real
+          company data or passwords.
+        </div>
+        <h3 style="margin-top: 18px">Sample accounts</h3>
+        <div class="table-wrap">
+          <table style="min-width: 0">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Username</th>
+                <th>Trial password</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Employee</td>
+                <td>EMP001</td>
+                <td>EMP001</td>
+              </tr>
+              <tr>
+                <td>Employee</td>
+                <td>EMP002</td>
+                <td>EMP002</td>
+              </tr>
+              <tr>
+                <td>Supervisor</td>
+                <td>SUP001</td>
+                <td>SUP001</td>
+              </tr>
+              <tr>
+                <td>Depot In-charge</td>
+                <td>DIC001</td>
+                <td>DIC001</td>
+              </tr>
+              <tr>
+                <td>Commercial Manager</td>
+                <td>CM001</td>
+                <td>CM001</td>
+              </tr>
+              <tr>
+                <td>Administrator</td>
+                <td>ADMIN001</td>
+                <td>ADMIN001</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="layout" id="appLayout" style="display: none">
+      <aside>
+        <div class="navlabel">WORKSPACE</div>
+        <button class="navbtn active" data-page="dashboard">
+          ▦ &nbsp; Dashboard</button
+        ><button class="navbtn" data-page="mytasks">☑ &nbsp; My Tasks</button
+        ><button class="navbtn" data-page="alltasks">
+          ▤ &nbsp; Task Register</button
+        ><button class="navbtn" data-page="taskform">
+          ＋ &nbsp; Add / Edit Task
+        </button>
+        <div class="navlabel">CONTROL & REPORTS</div>
+        <button class="navbtn" data-page="verification">
+          ✓ &nbsp; Verification Queue</button
+        ><button class="navbtn" data-page="escalations">
+          ⚑ &nbsp; Overdue & Escalations</button
+        ><button class="navbtn" data-page="reports">▥ &nbsp; Reports</button
+        ><button class="navbtn" data-page="setup">
+          ⚙ &nbsp; Depot & User Setup</button
+        ><button class="navbtn" data-page="guide">ⓘ &nbsp; Trial Guide</button>
+      </aside>
+      <main class="main" id="main"></main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div
+      id="completionModal"
+      class="hidden"
+      style="
+        position: fixed;
+        inset: 0;
+        background: #17233799;
+        z-index: 30;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div
+        class="panel"
+        style="
+          width: min(620px, 100%);
+          max-height: 90vh;
+          overflow: auto;
+          margin: 0;
+        "
+      >
+        <div class="title-row">
+          <div>
+            <h2 style="font-size: 21px; margin: 0">Submit task completion</h2>
+            <div id="completionTaskTitle" class="sub"></div>
+          </div>
+          <button
+            class="secondary"
+            type="button"
+            onclick="closeCompletionModal()"
+          >
+            Close
+          </button>
+        </div>
+        <form id="completionForm">
+          <input type="hidden" id="completionRecordId" /><input
+            type="hidden"
+            id="completionTaskId"
+          /><input type="hidden" id="completionOccurrence" />
+          <div class="field">
+            <label for="completionRemarks">Completion remarks *</label
+            ><textarea
+              id="completionRemarks"
+              rows="3"
+              required
+              placeholder="Describe the work completed"
+            ></textarea>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label for="completionEvidence"
+              >Attach photo or document (optional)</label
+            ><input
+              id="completionEvidence"
+              type="file"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+            />
+            <div class="help">
+              Trial limit: 2 MB per file. Files are stored in this browser only.
+              Do not upload confidential or sensitive company records.
+            </div>
+            <div id="completionFileInfo" class="small"></div>
+          </div>
+          <div class="row" style="margin-top: 16px">
+            <button type="submit">Submit for verification</button
+            ><button
+              class="secondary"
+              type="button"
+              onclick="closeCompletionModal()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      const KEY = "depotOpsTrialV1";
+      let editingId = null;
+      const seed = () => ({
+        tasks: [
+          {
+            id: "T-1001",
+            name: "Clean warehouse floor",
+            depot: "Gurugram GG3",
+            area: "Storage area",
+            instructions:
+              "Sweep and clean the assigned floor area; remove visible waste.",
+            assigned: "EMP001",
+            assignedName: "Demo Employee",
+            verifier: "Supervisor",
+            frequency: "Daily",
+            dueTime: "10:00",
+            start: today(),
+            end: "",
+            occurrences: 1,
+            evidence: "Photo",
+            priority: "High",
+            active: true,
+            createdBy: "ADMIN",
+            createdAt: new Date().toISOString(),
+            history: [],
+          },
+          {
+            id: "T-1002",
+            name: "Check washroom hygiene",
+            depot: "Gurugram GG3",
+            area: "Washroom",
+            instructions:
+              "Check cleanliness, supplies and odour; report maintenance issues.",
+            assigned: "EMP001",
+            assignedName: "Demo Employee",
+            verifier: "Supervisor",
+            frequency: "Daily",
+            dueTime: "14:00",
+            start: today(),
+            end: "",
+            occurrences: 2,
+            evidence: "Checklist",
+            priority: "Normal",
+            active: true,
+            createdBy: "ADMIN",
+            createdAt: new Date().toISOString(),
+            history: [],
+          },
+          {
+            id: "T-1003",
+            name: "Inspect fire safety equipment",
+            depot: "Delhi WDD",
+            area: "Dispatch / exits",
+            instructions:
+              "Check access, visible condition and inspection tag. Escalate any safety concern immediately.",
+            assigned: "EMP002",
+            assignedName: "Ravi Kumar",
+            verifier: "Depot In-charge",
+            frequency: "Weekly",
+            dueTime: "16:00",
+            start: today(),
+            end: "",
+            occurrences: 1,
+            evidence: "Checklist + Photo",
+            priority: "Critical",
+            active: true,
+            createdBy: "ADMIN",
+            createdAt: new Date().toISOString(),
+            history: [],
+          },
+          {
+            id: "T-1004",
+            name: "Monthly 5S inspection",
+            depot: "Rewari Depot",
+            area: "All areas",
+            instructions:
+              "Review sorting, set-in-order, shine, standardise and sustain.",
+            assigned: "EMP003",
+            assignedName: "Neha Sharma",
+            verifier: "Supervisor",
+            frequency: "Monthly",
+            dueTime: "17:00",
+            start: today(),
+            end: "",
+            occurrences: 1,
+            evidence: "Checklist",
+            priority: "Normal",
+            active: true,
+            createdBy: "ADMIN",
+            createdAt: new Date().toISOString(),
+            history: [],
+          },
+        ],
+        records: [],
+        audit: [],
+        depots: [
+          { name: "Gurugram GG3", active: true },
+          { name: "Delhi WDD", active: true },
+          { name: "Rewari Depot", active: true },
+        ],
+        users: [
+          {
+            id: "EMP001",
+            name: "Demo Employee",
+            role: "Employee",
+            depot: "Gurugram GG3",
+            active: true,
+          },
+          {
+            id: "EMP002",
+            name: "Ravi Kumar",
+            role: "Employee",
+            depot: "Delhi WDD",
+            active: true,
+          },
+          {
+            id: "EMP003",
+            name: "Neha Sharma",
+            role: "Employee",
+            depot: "Rewari Depot",
+            active: true,
+          },
+          {
+            id: "SUP001",
+            name: "Demo Supervisor",
+            role: "Supervisor",
+            depot: "Gurugram GG3",
+            active: true,
+          },
+        ],
+      });
+      function today() {
+        const d = new Date();
+        return (
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0")
+        );
+      }
+      function load() {
+        try {
+          return JSON.parse(localStorage.getItem(KEY)) || seed();
+        } catch (e) {
+          return seed();
+        }
+      }
+      let db = load();
+      if (!db.depots)
+        db.depots = [...new Set(db.tasks.map((t) => t.depot))].map((name) => ({
+          name,
+          active: true,
+        }));
+      if (!db.users)
+        db.users = [
+          {
+            id: "EMP001",
+            name: "Demo Employee",
+            role: "Employee",
+            depot: db.depots[0]?.name || "",
+            active: true,
+          },
+          {
+            id: "EMP002",
+            name: "Ravi Kumar",
+            role: "Employee",
+            depot: db.depots[1]?.name || "",
+            active: true,
+          },
+          {
+            id: "EMP003",
+            name: "Neha Sharma",
+            role: "Employee",
+            depot: db.depots[2]?.name || "",
+            active: true,
+          },
+        ]; // Ensure the login trial has its sample accounts, without resetting existing task data.
+      const demoAccounts = [
+        {
+          id: "EMP001",
+          name: "Demo Employee",
+          role: "Employee",
+          depot: "Gurugram GG3",
+          active: true,
+        },
+        {
+          id: "EMP002",
+          name: "Ravi Kumar",
+          role: "Employee",
+          depot: "Delhi WDD",
+          active: true,
+        },
+        {
+          id: "EMP003",
+          name: "Neha Sharma",
+          role: "Employee",
+          depot: "Rewari Depot",
+          active: true,
+        },
+        {
+          id: "SUP001",
+          name: "Demo Supervisor",
+          role: "Supervisor",
+          depot: "Gurugram GG3",
+          active: true,
+        },
+        {
+          id: "DIC001",
+          name: "Demo Depot In-charge",
+          role: "Depot In-charge",
+          depot: "Delhi WDD",
+          active: true,
+        },
+        {
+          id: "CM001",
+          name: "Demo Commercial Manager",
+          role: "Commercial Manager",
+          depot: "",
+          active: true,
+        },
+        {
+          id: "ADMIN001",
+          name: "Trial Administrator",
+          role: "Administrator",
+          depot: "",
+          active: true,
+        },
+      ];
+      for (const du of demoAccounts) {
+        let found = db.users.find(
+          (x) => x.id.toLowerCase() === du.id.toLowerCase(),
+        );
+        if (!found) db.users.push(du);
+        else if (du.id === "ADMIN001") {
+          found.name = found.name || du.name;
+          found.role = "Administrator";
+          found.active = true;
+        }
+      }
+      function save() {
+        localStorage.setItem(KEY, JSON.stringify(db));
+      }
+      save();
+      function esc(s) {
+        return String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      let activeUser = null;
+      function user() {
+        return activeUser || { role: "Guest", id: "", name: "Guest" };
+      }
+      function audit(action, detail) {
+        let u = user();
+        db.audit.unshift({
+          at: new Date().toISOString(),
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          action,
+          detail,
+        });
+        save();
+      }
+      function toast(t) {
+        let x = document.getElementById("toast");
+        x.textContent = t;
+        x.style.display = "block";
+        setTimeout(() => (x.style.display = "none"), 2600);
+      }
+      function statusTag(s) {
+        let c =
+          s === "Verified"
+            ? "green"
+            : ["Overdue", "Missed / Expired", "Returned"].includes(s)
+              ? "red"
+              : ["Submitted", "Awaiting Verification"].includes(s)
+                ? "amber"
+                : "blue";
+        return `<span class="tag ${c}">${esc(s)}</span>`;
+      }
+      function dateOnly(s) {
+        return new Date((s || today()) + "T12:00:00");
+      }
+      function dateShift(s, days) {
+        const d = dateOnly(s);
+        d.setDate(d.getDate() + days);
+        return (
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0")
+        );
+      }
+      function isExpiredOccurrence(date, task) {
+        const freq = (task.frequency || "Daily").toLowerCase(),
+          now = dateOnly(today()),
+          scheduled = dateOnly(date);
+        if (date >= today()) return false;
+        if (freq === "daily") return true;
+        if (freq === "weekly") {
+          const day = now.getDay(),
+            weekStart = dateOnly(today());
+          weekStart.setDate(weekStart.getDate() - day);
+          return scheduled < weekStart;
+        }
+        if (freq === "monthly")
+          return (
+            scheduled.getFullYear() < now.getFullYear() ||
+            (scheduled.getFullYear() === now.getFullYear() &&
+              scheduled.getMonth() < now.getMonth())
+          );
+        return false;
+      }
+      function scheduledDates(task) {
+        const start = task.start || today(),
+          end = task.end || today(),
+          deactivatedOn = task.updatedAt
+            ? task.updatedAt.slice(0, 10)
+            : today(),
+          last = task.active ? today() : dateShift(deactivatedOn, -1);
+        const through = task.end && task.end < last ? task.end : last;
+        let dates = [];
+        if (start > through) return dates;
+        let d = dateOnly(start),
+          limit = dateOnly(through),
+          freq = (task.frequency || "Daily").toLowerCase();
+        if (freq === "once" || freq === "one-time" || freq === "one time")
+          return [start <= through ? start : null].filter(Boolean);
+        if (freq === "daily") {
+          while (d <= limit) {
+            dates.push(
+              d.getFullYear() +
+                "-" +
+                String(d.getMonth() + 1).padStart(2, "0") +
+                "-" +
+                String(d.getDate()).padStart(2, "0"),
+            );
+            d.setDate(d.getDate() + 1);
+          }
+        } else if (freq === "weekly") {
+          while (d <= limit) {
+            dates.push(
+              d.getFullYear() +
+                "-" +
+                String(d.getMonth() + 1).padStart(2, "0") +
+                "-" +
+                String(d.getDate()).padStart(2, "0"),
+            );
+            d.setDate(d.getDate() + 7);
+          }
+        } else if (freq === "monthly") {
+          const day = d.getDate();
+          while (d <= limit) {
+            dates.push(
+              d.getFullYear() +
+                "-" +
+                String(d.getMonth() + 1).padStart(2, "0") +
+                "-" +
+                String(d.getDate()).padStart(2, "0"),
+            );
+            const nextMonth = d.getMonth() + 1;
+            d = new Date(
+              d.getFullYear(),
+              nextMonth,
+              Math.min(
+                day,
+                new Date(d.getFullYear(), nextMonth + 1, 0).getDate(),
+              ),
+              12,
+            );
+          }
+        } else {
+          return [today()];
+        }
+        return dates;
+      }
+      function syncOccurrences() {
+        let changed = false;
+        const now = today();
+        db.tasks.forEach((t) => {
+          const count = Math.max(1, +t.occurrences || 1);
+          scheduledDates(t).forEach((date) => {
+            for (let occurrence = 1; occurrence <= count; occurrence++) {
+              const exists = db.records.some(
+                (r) =>
+                  r.taskId === t.id &&
+                  r.date === date &&
+                  (+r.occurrence || 1) === occurrence,
+              );
+              if (exists) continue;
+              const expired = isExpiredOccurrence(date, t);
+              db.records.push({
+                id: t.id + "-" + date + "-" + occurrence,
+                taskId: t.id,
+                occurrence,
+                date,
+                status: expired ? "Missed / Expired" : "Pending",
+                employeeId: t.assigned,
+                employeeName: t.assignedName,
+                taskName: t.name,
+                depot: t.depot,
+                dueTime: t.dueTime,
+                frequency: t.frequency,
+                priority: t.priority,
+                synthetic: false,
+                createdAt: new Date().toISOString(),
+                expiryNote: expired
+                  ? "Automatically marked missed when historical scheduled occurrence was generated"
+                  : "",
+              });
+              changed = true;
+            }
+          });
+        });
+        if (changed) save();
+      }
+      function occurrenceRecords(task) {
+        syncOccurrences();
+        return db.records.filter((r) => r.taskId === task.id);
+      }
+      function allRows() {
+        syncOccurrences();
+        return [...db.records].sort((a, b) =>
+          (b.date || "").localeCompare(a.date || ""),
+        );
+      }
+      function pageTitle(title, desc, extra = "") {
+        return `<div class="title-row"><div><h2>${title}</h2><div class="sub">${desc}</div></div>${extra}</div>`;
+      }
+      function metric(label, val, note = "") {
+        return `<div class="card"><div class="metric-label">${label}</div><div class="metric">${val}</div><div class="metric-note">${note}</div></div>`;
+      }
+      function canAdmin() {
+        return user().role === "Administrator";
+      }
+      function canVerify() {
+        return [
+          "Administrator",
+          "Supervisor",
+          "Depot In-charge",
+          "Commercial Manager",
+        ].includes(user().role);
+      }
+      function pageAllowed(page) {
+        let r = user().role;
+        if (r === "Administrator") return true;
+        if (r === "Employee")
+          return ["dashboard", "mytasks", "guide"].includes(page);
+        if (["Supervisor", "Depot In-charge", "Commercial Manager"].includes(r))
+          return [
+            "dashboard",
+            "mytasks",
+            "verification",
+            "escalations",
+            "reports",
+            "guide",
+          ].includes(page);
+        return page === "dashboard";
+      }
+      function render(page = "dashboard") {
+        if (!pageAllowed(page)) page = "dashboard";
+        document.querySelectorAll(".navbtn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.page === page);
+          b.style.display = pageAllowed(b.dataset.page) ? "block" : "none";
+        });
+        let main = document.getElementById("main");
+        const u = user();
+        let rows = allRows();
+        if (page === "dashboard") {
+          const dashboardRows =
+            u.role === "Employee"
+              ? rows.filter((r) => r.employeeId === u.id)
+              : rows;
+          let verified = dashboardRows.filter(
+              (r) => r.status === "Verified",
+            ).length,
+            pending = dashboardRows.filter((r) =>
+              ["Pending", "In Progress"].includes(r.status),
+            ).length,
+            submitted = dashboardRows.filter((r) =>
+              ["Submitted", "Awaiting Verification"].includes(r.status),
+            ).length,
+            missed = dashboardRows.filter((r) =>
+              ["Overdue", "Missed / Expired"].includes(r.status),
+            ).length;
+          const dashboardTitle =
+            u.role === "Employee"
+              ? `Your task status overview — ${esc(u.name)} (${esc(u.id)})`
+              : u.role === "Administrator"
+                ? "Organisation-wide task status overview"
+                : "Team task status overview";
+          main.innerHTML =
+            pageTitle(
+              "Depot dashboard",
+              u.role === "Employee"
+                ? "Personal task status and assigned work"
+                : "Operational snapshot across demo depots",
+              `<button onclick="render('taskform')" ${canAdmin() ? "" : "disabled"}>＋ Add task</button>`,
+            ) +
+            `<div class="notice"><b>Prototype notice:</b> Data is saved only in this browser on this device. Login is simulated for workflow demonstration, not secure authentication. Live multi-user sharing and automatic server-side alerts are not enabled.</div><div class="cards">${metric("Active task definitions", db.tasks.filter((t) => t.active).length, "Configurable by administrator")}${metric("Pending completion", pending, "Not yet submitted")}${metric("Awaiting verification", submitted, "Submitted work requiring review")}${metric("Verified records", verified, "Approved by authorised reviewer")}${metric("Missed / overdue", missed, "Requires follow-up")}${metric("Depots configured", new Set(db.tasks.map((t) => t.depot)).size, "Demo depot list")}${metric("Tasks due today", dashboardRows.filter((r) => r.date === today() && r.status === "Pending").length, "Illustrative current-day view")}${metric("Audit events", u.role === "Employee" ? db.audit.filter((a) => a.id === u.id).length : db.audit.length, "Changes recorded in this browser")}</div><div class="panel"><h3>${dashboardTitle}</h3>${tableRows(dashboardRows.slice(0, 8), true)}</div><div class="panel"><h3>Trial checklist</h3><div class="pillrow"><span>✓ Task setup</span><span>✓ Schedule fields</span><span>✓ Completion workflow</span><span>✓ Supervisor review</span><span>✓ Expiry status fields</span><span>△ Server notifications not connected</span><span>△ Shared login/database not connected</span></div></div>`;
+        } else if (page === "mytasks") {
+          let my = db.records.filter((r) => r.employeeId === u.id);
+          let assigned = db.tasks.filter(
+            (t) => t.active && t.assigned === u.id,
+          );
+          let myRows = [];
+          assigned.forEach((t) => {
+            let found = my.filter((r) => r.taskId === t.id);
+            if (found.length) myRows.push(...found);
+            else
+              for (let i = 1; i <= +t.occurrences; i++)
+                myRows.push({
+                  id: t.id + "-" + today() + "-" + i,
+                  taskId: t.id,
+                  occurrence: i,
+                  date: today(),
+                  status: "Pending",
+                  employeeId: u.id,
+                  employeeName: u.name,
+                  taskName: t.name,
+                  depot: t.depot,
+                  dueTime: t.dueTime,
+                  frequency: t.frequency,
+                  priority: t.priority,
+                  synthetic: true,
+                });
+          });
+          main.innerHTML =
+            pageTitle("My tasks", `Assigned to ${esc(u.name)} (${esc(u.id)})`) +
+            `<div class="notice">Sign in as <b>EMP001</b> to try the seeded tasks assigned to the demo employee. Marking a task complete records the current demo user's identity.</div><div class="panel"><h3>Assigned work</h3>${tableRows(myRows, false, true)}</div>`;
+        } else if (page === "alltasks") {
+          main.innerHTML =
+            pageTitle(
+              "Task register",
+              "Admin-maintained task definitions, schedules and assignment details",
+              `<button onclick="render('taskform')" ${canAdmin() ? "" : "disabled"}>＋ Add task</button>`,
+            ) +
+            `<div class="filterbar"><input id="taskSearch" placeholder="Search task, depot or assignee" oninput="filterTasks()"><select id="depotFilter" onchange="filterTasks()"><option value="">All depots</option>${[...new Set(db.tasks.map((t) => t.depot))].map((d) => `<option>${esc(d)}</option>`).join("")}</select><select id="activeFilter" onchange="filterTasks()"><option value="all">All tasks (active + inactive)</option><option value="active">Active tasks</option><option value="inactive">Inactive tasks</option></select></div><div class="panel"><div class="table-wrap"><table id="taskTable"><thead><tr><th>Task</th><th>Depot / Area</th><th>Assigned to</th><th>Schedule</th><th>Evidence</th><th>Status</th><th>Admin actions</th></tr></thead><tbody>${taskDefs()}</tbody></table></div></div>`;
+        } else if (page === "taskform") {
+          if (!canAdmin()) {
+            main.innerHTML =
+              pageTitle("Add / edit task", "Administrator access required") +
+              `<div class="panel">Only the Administrator role can add or edit task definitions in this prototype. Switch the demo role above to continue.</div>`;
+            return;
+          }
+          let t = db.tasks.find((x) => x.id === editingId) || {};
+          main.innerHTML =
+            pageTitle(
+              editingId ? "Edit task" : "Create task",
+              "Task definitions can be configured after the app is ready for trial",
+            ) +
+            `<div class="panel"><form id="taskForm" onsubmit="saveTask(event)"><div class="formgrid"><div class="field"><label>Task name *</label><input name="name" required value="${esc(t.name || "")}" placeholder="e.g. Clean warehouse floor"></div><div class="field"><label>Depot *</label><input name="depot" required value="${esc(t.depot || "")}" placeholder="Depot name"></div><div class="field"><label>Location / area *</label><input name="area" required value="${esc(t.area || "")}" placeholder="Storage area, dock, washroom..."></div><div class="field"><label>Assigned employee login ID *</label><input name="assigned" required value="${esc(t.assigned || "EMP001")}"></div><div class="field"><label>Assigned employee name *</label><input name="assignedName" required value="${esc(t.assignedName || "Demo Employee")}"></div><div class="field"><label>Verifier role</label><select name="verifier">${["Supervisor", "Depot In-charge", "Commercial Manager"].map((v) => `<option ${t.verifier === v ? "selected" : ""}>${v}</option>`).join("")}</select></div><div class="field"><label>Frequency *</label><select name="frequency" required>${["Daily", "Weekly", "Monthly", "One-time", "Custom"].map((v) => `<option ${t.frequency === v ? "selected" : ""}>${v}</option>`).join("")}</select></div><div class="field"><label>Due time *</label><input type="time" name="dueTime" required value="${esc(t.dueTime || "10:00")}"></div><div class="field"><label>Occurrences per day</label><input type="number" min="1" max="24" name="occurrences" value="${esc(t.occurrences || 1)}" required><div class="help">Use 2 or 3 for tasks performed multiple times daily.</div></div><div class="field"><label>Start date *</label><input type="date" name="start" required value="${esc(t.start || today())}"></div><div class="field"><label>End date (optional)</label><input type="date" name="end" value="${esc(t.end || "")}"><div class="help">Admin can extend the date; existing records remain unchanged.</div></div><div class="field"><label>Permitted completion window</label><select name="window"><option ${t.window === "Until due time" ? "selected" : ""}>Until due time</option><option ${t.window === "30 minutes" ? "selected" : ""}>30 minutes</option><option ${t.window === "1 hour" ? "selected" : ""}>1 hour</option><option ${t.window === "End of period" ? "selected" : ""}>End of period</option></select></div><div class="field"><label>Evidence required</label><select name="evidence">${["None", "Remarks", "Photo", "Checklist", "Checklist + Photo"].map((v) => `<option ${t.evidence === v ? "selected" : ""}>${v}</option>`).join("")}</select></div><div class="field"><label>Priority</label><select name="priority">${["Normal", "High", "Critical"].map((v) => `<option ${t.priority === v ? "selected" : ""}>${v}</option>`).join("")}</select></div><div class="field"><label>Expiry rule</label><select name="expiry">${["End of day", "End of week", "End of month", "No automatic expiry", "Custom"].map((v) => `<option ${t.expiry === v ? "selected" : ""}>${v}</option>`).join("")}</select></div><div class="field full"><label>Instructions</label><textarea name="instructions" rows="3" placeholder="Describe what the employee must do">${esc(t.instructions || "")}</textarea></div><div class="field full"><div class="checkline"><input type="checkbox" name="active" ${t.active === false ? "" : "checked"}><label>Task is active and should generate future assignments</label></div><div class="help">All seven days are treated as working days. The trial prototype demonstrates schedule fields; automatic recurring assignment generation and server-side expiry jobs require backend implementation.</div></div></div><div class="row" style="margin-top:18px"><button type="submit">Save task</button><button type="button" class="secondary" onclick="editingId=null;render('alltasks')">Cancel</button></div></form></div>`;
+        } else if (page === "verification") {
+          let pending = db.records.filter((r) =>
+            ["Submitted", "Awaiting Verification", "Returned"].includes(
+              r.status,
+            ),
+          );
+          main.innerHTML =
+            pageTitle(
+              "Verification queue",
+              "Review submitted work and record approval or return",
+            ) +
+            `<div class="notice">Sign in as <b>SUP001</b> (Supervisor) or an authorised reviewer account. A verified task cannot be silently edited; corrections should be returned with a reason.</div><div class="panel"><h3>Items requiring review</h3>${tableRows(pending, false, false, true)}</div>`;
+        } else if (page === "escalations") {
+          let list = rows.filter(
+            (r) =>
+              [
+                "Overdue",
+                "Missed / Expired",
+                "Submitted",
+                "Awaiting Verification",
+                "Pending",
+                "Returned",
+              ].includes(r.status) || r.priority === "Critical",
+          );
+          const stageFor = (r) => {
+            if (r.priority === "Critical")
+              return "Immediate escalation (critical)";
+            let due = new Date(
+              (r.date || today()) + "T" + (r.dueTime || "23:59") + ":00",
+            );
+            let mins = (Date.now() - due.getTime()) / 60000;
+            if (mins < 0) return "Not yet due";
+            if (mins >= 60) return "Commercial Manager (60+ min)";
+            if (mins >= 30) return "Depot In-charge (30+ min)";
+            return "Supervisor (at due time)";
+          };
+          const matrix = `<div class="panel"><h3>Escalation matrix — calculated when this screen opens</h3><div class="table-wrap"><table><thead><tr><th>Task</th><th>Employee</th><th>Due</th><th>Status</th><th>Escalation stage</th></tr></thead><tbody>${list.map((r) => `<tr><td>${esc(r.taskName || r.taskId)} <div class="small">${esc(r.taskId)} · Occurrence ${r.occurrence || 1}</div></td><td>${esc(r.employeeName || "")} (${esc(r.employeeId || "")})</td><td>${esc(r.date || today())} ${esc(r.dueTime || "")}</td><td>${statusTag(r.status || "Pending")}</td><td>${esc(stageFor(r))}</td></tr>`).join("") || '<tr><td colspan="5">No tasks currently match the escalation review.</td></tr>'}</tbody></table></div></div>`;
+          main.innerHTML =
+            pageTitle(
+              "Overdue & escalations",
+              "Review the intended escalation stage for unresolved tasks",
+            ) +
+            `<div class="notice"><b>Trial rules:</b> Supervisor at due time → Depot In-charge after 30 minutes → Commercial Manager after 60 minutes. Critical tasks are flagged for immediate escalation. Stages are calculated when this screen opens; this prototype does not run background timers or send real alerts.</div>${matrix}<div class="panel"><h3>Items for attention</h3>${tableRows(list, false, false, true)}</div><div class="panel"><h3>Escalation audit</h3>${
+              db.audit.filter((a) =>
+                /escalat|overdue|missed/i.test(a.action + " " + a.detail),
+              ).length
+                ? `<ul>${db.audit
+                    .filter((a) =>
+                      /escalat|overdue|missed/i.test(a.action + " " + a.detail),
+                    )
+                    .slice(0, 10)
+                    .map(
+                      (a) =>
+                        `<li>${esc(new Date(a.at).toLocaleString())} — ${esc(a.id)} — ${esc(a.action)}: ${esc(a.detail)}</li>`,
+                    )
+                    .join("")}</ul>`
+                : '<div class="empty">No escalation events recorded yet.</div>'
+            }</div>`;
+        } else if (page === "reports") {
+          let recs = db.records;
+          let missed = recs.filter((r) =>
+            ["Missed / Expired", "Overdue"].includes(r.status),
+          );
+          main.innerHTML =
+            pageTitle(
+              "Reports & performance",
+              "Includes historical, missed/expired, submitted and verified occurrences",
+              `<button onclick="exportCSV()">Export CSV</button>`,
+            ) +
+            `<div class="notice">Scheduled occurrences are retained by date. Uncompleted past daily/weekly/monthly occurrences are shown as Missed / Expired; submitted and verified records retain their actual status. This remains a local-browser demonstration, not a shared server database.</div><div class="cards">${metric("Recorded occurrences", recs.length, "Actual saved records")}${metric("Completed", recs.filter((r) => ["Submitted", "Awaiting Verification", "Verified"].includes(r.status)).length, "Submitted or approved")}${metric("Verified", recs.filter((r) => r.status === "Verified").length, "Supervisor-approved")}${metric("Missed / expired", missed.length, "For performance evaluation")}${metric("Records with evidence", recs.filter((r) => r.evidenceFile).length, "Photo/document attached")}</div><div class="panel"><h3>Task occurrence records</h3>${tableRows(recs, false, false, true)}</div><div class="panel"><h3>Audit trail</h3><div class="table-wrap"><table><thead><tr><th>Date/time</th><th>Login ID / Name</th><th>Role</th><th>Action</th><th>Details</th></tr></thead><tbody>${
+              db.audit
+                .slice(0, 30)
+                .map(
+                  (a) =>
+                    `<tr><td>${esc(new Date(a.at).toLocaleString())}</td><td>${esc(a.id)} / ${esc(a.name)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${esc(a.detail)}</td></tr>`,
+                )
+                .join("") ||
+              '<tr><td colspan="5">No audit events yet.</td></tr>'
+            }</tbody></table></div></div>`;
+        } else if (page === "setup") {
+          if (!canAdmin()) {
+            main.innerHTML =
+              pageTitle("Depot & user setup", "Administrator access required") +
+              `<div class="panel">Only the Administrator role can manage depot and user master data.</div>`;
+            return;
+          }
+          main.innerHTML =
+            pageTitle(
+              "Depot & user setup",
+              "Edit sample names now; replace them with actual depot and employee details before live deployment",
+            ) +
+            `<div class="notice"><b>Trial limitation:</b> These changes are saved in this browser only. User entries are demo master data; trial passwords follow the username convention and are not secure.</div><div class="panel"><div class="title-row"><div><h3>Depots</h3><div class="sub">Rename, add, or deactivate depots. Historical task records are retained.</div></div><button onclick="addDepot()">＋ Add depot</button></div><div class="table-wrap"><table><thead><tr><th>Depot name</th><th>Status</th><th>Actions</th></tr></thead><tbody>${db.depots.map((d, i) => `<tr><td>${esc(d.name)}</td><td>${d.active ? "Active" : "Inactive"}</td><td><div class="actions"><button class="secondary" onclick="renameDepot(${i})">Rename</button><button class="${d.active ? "danger" : "secondary"}" onclick="toggleDepot(${i})">${d.active ? "Deactivate" : "Reactivate"}</button></div></td></tr>`).join("")}</tbody></table></div></div><div class="panel"><div class="title-row"><div><h3>Sample users</h3><div class="sub">Add and edit employee names, login IDs, roles and depot assignments.</div></div><button onclick="addUser()">＋ Add user</button></div><div class="table-wrap"><table><thead><tr><th>Login ID</th><th>Name</th><th>Role</th><th>Depot</th><th>Status</th><th>Actions</th></tr></thead><tbody>${db.users.map((u, i) => `<tr><td>${esc(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${esc(u.depot || "—")}</td><td>${u.active ? "Active" : "Inactive"}</td><td><div class="actions"><button class="secondary" onclick="editUser(${i})">Edit</button><button class="${u.active ? "danger" : "secondary"}" onclick="toggleUser(${i})">${u.active ? "Deactivate" : "Reactivate"}</button></div></td></tr>`).join("")}</tbody></table></div></div>`;
+        } else {
+          main.innerHTML =
+            pageTitle("Trial guide", "How to test the prototype") +
+            `<div class="panel"><h3>1. Try task administration</h3><ol><li>Choose the <b>Administrator</b> role.</li><li>Open <b>Add / Edit Task</b>, create a test task, and save it.</li><li>Open Task Register to edit or deactivate a task. Deactivation retains its history.</li></ol><h3>2. Try completion</h3><ol><li>Assign a task to login ID <b>EMP001</b>.</li><li>Choose Employee, set login ID to EMP001 and name to the assigned employee.</li><li>Open My Tasks and submit a completion remark.</li><li>Switch to Supervisor and approve or return the submission.</li></ol><h3>3. Try reports</h3><p>Open Reports to review saved records and the audit trail. Export CSV for spreadsheet review.</p><h3>Important limitations</h3><ul><li>Version 3 shows active and inactive task definitions by default and generates dated occurrence records for the supported daily, weekly, monthly and one-time schedules when the app is opened.</li><li>This is a browser-based prototype. Data stays in this browser's local storage and is not shared between users or computers.</li><li>The login is a browser-only demonstration, not secure sign-in or production access control.</li><li>Real recurring schedules, expiry processing, timed escalation notifications, secure authentication, central database, secure central evidence storage, PDF reports and the five 5S examinations still need production implementation. This v7 trial adds optional photo/document attachments (2 MB limit) and includes evidence filenames in CSV reports.</li><li>Reset demo clears prototype data and restores the sample tasks.</li></ul></div>`;
+        }
+        document
+          .getElementById("main")
+          .querySelectorAll("form")
+          .forEach((f) =>
+            f.addEventListener("submit", (e) => e.preventDefault()),
+          );
+      }
+      function taskDefs() {
+        let f = document.getElementById("activeFilter")?.value || "all";
+        return (
+          db.tasks
+            .filter(
+              (t) => f === "all" || (f === "active" ? t.active : !t.active),
+            )
+            .map(
+              (t) =>
+                `<tr data-search="${esc((t.name + " " + t.depot + " " + t.assignedName + " " + t.area).toLowerCase())}" data-depot="${esc(t.depot)}"><td><b>${esc(t.name)}</b><div class="small">${esc(t.id)} · ${esc(t.instructions || "")}</div></td><td>${esc(t.depot)}<div class="small">${esc(t.area)}</div></td><td>${esc(t.assignedName)}<div class="small">${esc(t.assigned)}</div></td><td>${esc(t.frequency)}<div class="small">${esc(t.dueTime)} · ${t.occurrences} occurrence(s)/day</div><div class="small">From ${esc(t.start)}${t.end ? " to " + esc(t.end) : ""}</div></td><td>${esc(t.evidence || "None")}</td><td>${t.active ? '<span class="tag green">Active</span>' : '<span class="tag">Inactive</span>'}</td><td><div class="actions"><button class="secondary" onclick="editTask('${t.id}')" ${canAdmin() ? "" : "disabled"}>Edit</button><button class="${t.active ? "danger" : "secondary"}" onclick="toggleTask('${t.id}')" ${canAdmin() ? "" : "disabled"}>${t.active ? "Deactivate" : "Reactivate"}</button></div></td></tr>`,
+            )
+            .join("") ||
+          '<tr><td colspan="7">No tasks match this filter.</td></tr>'
+        );
+      }
+      function filterTasks() {
+        let q = (
+            document.getElementById("taskSearch")?.value || ""
+          ).toLowerCase(),
+          d = document.getElementById("depotFilter")?.value || "";
+        document
+          .querySelectorAll("#taskTable tbody tr[data-search]")
+          .forEach(
+            (r) =>
+              (r.style.display =
+                (!q || r.dataset.search.includes(q)) &&
+                (!d || r.dataset.depot === d)
+                  ? ""
+                  : "none"),
+          );
+      }
+      function tableRows(
+        records,
+        compact = false,
+        employeeView = false,
+        reviewView = false,
+      ) {
+        if (!records.length)
+          return '<div class="empty">No records to display yet. Submit a task to populate this section.</div>';
+        return `<div class="table-wrap"><table><thead><tr><th>Task / Occurrence</th><th>Depot</th><th>Assigned employee</th><th>Due</th><th>Status</th><th>${reviewView ? "Review / action" : "Action"}</th></tr></thead><tbody>${records
+          .map((r) => {
+            let task = db.tasks.find((t) => t.id === r.taskId) || {};
+            let status = r.status || "Pending";
+            let act = "";
+            if (
+              employeeView &&
+              ["Pending", "In Progress", "Returned"].includes(status)
+            )
+              act = `<button onclick="openCompletionModal('${r.id}','${r.taskId}',${r.occurrence || 1})">${status === "Returned" ? "Resubmit" : "Mark complete"}</button>`;
+            else if (
+              reviewView &&
+              canVerify() &&
+              ["Submitted", "Awaiting Verification", "Returned"].includes(
+                status,
+              )
+            )
+              act = `<button onclick="verifyTask('${r.id}','approve')">Approve</button><button class="danger" onclick="verifyTask('${r.id}','return')">Return</button>`;
+            else if (!employeeView && !reviewView && task.id && canAdmin())
+              act = `<button class="secondary" onclick="editTask('${task.id}')">Edit task</button>`;
+            else act = '<span class="small">—</span>';
+            return `<tr><td><b>${esc(r.taskName || task.name || r.taskId)}</b><div class="small">${esc(r.taskId)} · Occurrence ${r.occurrence || 1}</div>${r.remarks ? `<div class="small">Remark: ${esc(r.remarks)}</div>` : ""}${r.evidenceFile ? `<div class="small">Evidence: ${esc(r.evidenceFile.name)} (${Math.ceil((r.evidenceFile.size || 0) / 1024)} KB) · <button class="secondary" onclick="viewEvidence('${r.id}')">View</button></div>` : ""}</td><td>${esc(r.depot || task.depot || "")}</td><td>${esc(r.employeeName || task.assignedName || "")}<div class="small">${esc(r.employeeId || task.assigned || "")}</div></td><td>${esc(r.date || today())}<div class="small">${esc(r.dueTime || task.dueTime || "")}</div></td><td>${statusTag(status)}${r.verifiedBy ? `<div class="small">By ${esc(r.verifiedBy)}</div>` : ""}</td><td><div class="actions">${act}</div></td></tr>`;
+          })
+          .join("")}</tbody></table></div>`;
+      }
+      function saveTask(e) {
+        e.preventDefault();
+        if (!canAdmin()) return;
+        let f = new FormData(document.getElementById("taskForm"));
+        let t = {
+          name: f.get("name").trim(),
+          depot: f.get("depot").trim(),
+          area: f.get("area").trim(),
+          assigned: f.get("assigned").trim(),
+          assignedName: f.get("assignedName").trim(),
+          verifier: f.get("verifier"),
+          frequency: f.get("frequency"),
+          dueTime: f.get("dueTime"),
+          occurrences: Math.max(1, Math.min(24, +f.get("occurrences") || 1)),
+          start: f.get("start"),
+          end: f.get("end"),
+          window: f.get("window"),
+          evidence: f.get("evidence"),
+          priority: f.get("priority"),
+          expiry: f.get("expiry"),
+          instructions: f.get("instructions").trim(),
+          active: f.get("active") === "on",
+        };
+        if (t.end && t.end < t.start) {
+          toast("End date cannot be earlier than start date.");
+          return;
+        }
+        if (editingId) {
+          let old = db.tasks.find((x) => x.id === editingId);
+          Object.assign(old, t);
+          old.updatedAt = new Date().toISOString();
+          audit("Task updated", old.id + " — " + old.name);
+        } else {
+          t.id = "T-" + (1000 + Math.floor(Math.random() * 8999));
+          t.createdAt = new Date().toISOString();
+          t.createdBy = user().id;
+          t.history = [];
+          db.tasks.unshift(t);
+          audit("Task created", t.id + " — " + t.name);
+        }
+        save();
+        editingId = null;
+        toast(
+          "Task saved. Refresh the application view to see the latest schedule.",
+        );
+        render("alltasks");
+      }
+      function editTask(id) {
+        if (!canAdmin()) {
+          toast("Administrator role required.");
+          return;
+        }
+        editingId = id;
+        render("taskform");
+      }
+      function toggleTask(id) {
+        if (!canAdmin()) {
+          toast("Administrator role required.");
+          return;
+        }
+        let t = db.tasks.find((x) => x.id === id);
+        t.active = !t.active;
+        t.updatedAt = new Date().toISOString();
+        audit(
+          t.active ? "Task reactivated" : "Task deactivated",
+          t.id + " — " + t.name,
+        );
+        save();
+        toast(
+          t.active
+            ? "Task reactivated"
+            : "Task deactivated; historical records retained",
+        );
+        render("alltasks");
+      }
+      function openCompletionModal(recordId, taskId, occ) {
+        let t = db.tasks.find((x) => x.id === taskId);
+        if (!t) return;
+        let existing = db.records.find((r) => r.id === recordId);
+        if (existing && existing.status === "Verified") {
+          toast("Verified record cannot be resubmitted.");
+          return;
+        }
+        document.getElementById("completionRecordId").value = recordId;
+        document.getElementById("completionTaskId").value = taskId;
+        document.getElementById("completionOccurrence").value = occ;
+        document.getElementById("completionTaskTitle").textContent =
+          t.name + " · " + taskId + " · Occurrence " + occ;
+        document.getElementById("completionRemarks").value =
+          existing?.remarks || "";
+        document.getElementById("completionEvidence").value = "";
+        document.getElementById("completionFileInfo").textContent =
+          existing?.evidenceFile
+            ? "Existing evidence: " +
+              existing.evidenceFile.name +
+              " (uploading a new file will replace it)"
+            : "";
+        const m = document.getElementById("completionModal");
+        m.classList.remove("hidden");
+        m.style.display = "flex";
+      }
+      function closeCompletionModal() {
+        const m = document.getElementById("completionModal");
+        m.style.display = "none";
+        m.classList.add("hidden");
+      }
+      document
+        .getElementById("completionEvidence")
+        .addEventListener("change", (e) => {
+          const f = e.target.files?.[0];
+          document.getElementById("completionFileInfo").textContent = f
+            ? `${f.name} · ${Math.ceil(f.size / 1024)} KB`
+            : "";
+        });
+      document
+        .getElementById("completionForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const file = document.getElementById("completionEvidence").files?.[0];
+          if (file && file.size > 2 * 1024 * 1024) {
+            toast(
+              "Please choose a file smaller than 2 MB for this browser trial.",
+            );
+            return;
+          }
+          const remarks = document
+            .getElementById("completionRemarks")
+            .value.trim();
+          if (!remarks) {
+            toast("Completion remarks are required.");
+            return;
+          }
+          const submit = (fileData) => {
+            const recordId =
+                document.getElementById("completionRecordId").value,
+              taskId = document.getElementById("completionTaskId").value,
+              occ = +document.getElementById("completionOccurrence").value,
+              t = db.tasks.find((x) => x.id === taskId);
+            if (!t) return;
+            const existing = db.records.find((r) => r.id === recordId);
+            let r = existing || {
+              id: recordId,
+              taskId,
+              occurrence: occ,
+              date: today(),
+              taskName: t.name,
+              depot: t.depot,
+              dueTime: t.dueTime,
+              frequency: t.frequency,
+              priority: t.priority,
+            };
+            const u = user();
+            Object.assign(r, {
+              status: "Submitted",
+              employeeId: u.id,
+              employeeName: u.name,
+              completedAt: new Date().toISOString(),
+              remarks,
+              submittedBy: u.id,
+              submittedName: u.name,
+              synthetic: false,
+            });
+            if (fileData) r.evidenceFile = fileData;
+            if (!existing) db.records.push(r);
+            audit(
+              "Task submitted",
+              t.id +
+                " occurrence " +
+                occ +
+                " — " +
+                t.name +
+                (fileData ? " with evidence " + fileData.name : ""),
+            );
+            save();
+            closeCompletionModal();
+            toast("Completion submitted for supervisor verification.");
+            render("mytasks");
+          };
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = () =>
+              submit({
+                name: file.name,
+                type: file.type || "application/octet-stream",
+                size: file.size,
+                dataUrl: reader.result,
+                uploadedAt: new Date().toISOString(),
+                uploadedBy: user().id,
+              });
+            reader.onerror = () =>
+              toast("Could not read the selected file. Please try again.");
+            reader.readAsDataURL(file);
+          } else submit(null);
+        });
+      function viewEvidence(recordId) {
+        const r = db.records.find((x) => x.id === recordId);
+        if (!r?.evidenceFile?.dataUrl) {
+          toast("No attached evidence file is available in this browser.");
+          return;
+        }
+        const a = document.createElement("a");
+        a.href = r.evidenceFile.dataUrl;
+        a.download = r.evidenceFile.name || "task-evidence";
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.click();
+        audit("Evidence viewed/downloaded", r.id + " — " + r.evidenceFile.name);
+        save();
+      }
+      function verifyTask(id, decision) {
+        if (!canVerify()) {
+          toast("Authorised reviewer role required.");
+          return;
+        }
+        let r = db.records.find((x) => x.id === id);
+        if (!r) return;
+        let u = user(),
+          remark = "";
+        if (decision === "return") {
+          remark = prompt(
+            "Reason for returning this task for correction:",
+            "Please correct the issue and resubmit.",
+          );
+          if (remark === null) return;
+          if (!remark.trim()) {
+            toast("A return reason is required.");
+            return;
+          }
+          r.status = "Returned";
+          r.returnReason = remark.trim();
+          audit("Task returned", r.taskId + " — " + remark.trim());
+        } else {
+          remark = prompt("Verification remark (optional):", "Verified");
+          if (remark === null) return;
+          r.status = "Verified";
+          r.verifiedBy = u.name + " (" + u.id + ")";
+          r.verifiedAt = new Date().toISOString();
+          r.verificationRemark = remark.trim();
+          audit("Task verified", r.taskId + " — " + remark.trim());
+        }
+        save();
+        toast(
+          decision === "approve"
+            ? "Task verified."
+            : "Task returned to employee.",
+        );
+        render("verification");
+      }
+      function addDepot() {
+        if (!canAdmin()) return;
+        let name = prompt("Enter depot name:");
+        if (!name || !name.trim()) return;
+        if (
+          db.depots.some(
+            (d) => d.name.toLowerCase() === name.trim().toLowerCase(),
+          )
+        ) {
+          toast("A depot with that name already exists.");
+          return;
+        }
+        db.depots.push({ name: name.trim(), active: true });
+        audit("Depot added", name.trim());
+        save();
+        render("setup");
+      }
+      function renameDepot(i) {
+        if (!canAdmin()) return;
+        let d = db.depots[i];
+        let name = prompt("Update depot name:", d.name);
+        if (!name || !name.trim() || name.trim() === d.name) return;
+        let old = d.name;
+        d.name = name.trim();
+        db.tasks.forEach((t) => {
+          if (t.depot === old) t.depot = d.name;
+        });
+        db.records.forEach((r) => {
+          if (r.depot === old) r.depot = d.name;
+        });
+        db.users.forEach((u) => {
+          if (u.depot === old) u.depot = d.name;
+        });
+        audit("Depot renamed", old + " → " + d.name);
+        save();
+        render("setup");
+      }
+      function toggleDepot(i) {
+        if (!canAdmin()) return;
+        db.depots[i].active = !db.depots[i].active;
+        audit(
+          db.depots[i].active ? "Depot reactivated" : "Depot deactivated",
+          db.depots[i].name,
+        );
+        save();
+        render("setup");
+      }
+      function addUser() {
+        if (!canAdmin()) return;
+        let id = prompt("Enter user login ID:");
+        if (!id || !id.trim()) return;
+        if (
+          db.users.some((u) => u.id.toLowerCase() === id.trim().toLowerCase())
+        ) {
+          toast("Login ID already exists.");
+          return;
+        }
+        let name = prompt("Enter user full name:");
+        if (!name || !name.trim()) return;
+        let role = prompt(
+          "Enter role: Employee, Supervisor, Depot In-charge, Commercial Manager, or Administrator",
+          "Employee",
+        );
+        if (!role) return;
+        let depot =
+          prompt(
+            "Enter assigned depot (optional):",
+            db.depots.find((d) => d.active)?.name || "",
+          ) || "";
+        db.users.push({
+          id: id.trim(),
+          name: name.trim(),
+          role: role.trim(),
+          depot: depot.trim(),
+          active: true,
+        });
+        audit("User added", id.trim() + " / " + name.trim());
+        save();
+        render("setup");
+      }
+      function editUser(i) {
+        if (!canAdmin()) return;
+        let u = db.users[i];
+        let id = prompt("Login ID:", u.id);
+        if (!id || !id.trim()) return;
+        if (
+          db.users.some(
+            (x, j) => j !== i && x.id.toLowerCase() === id.trim().toLowerCase(),
+          )
+        ) {
+          toast("Login ID already exists.");
+          return;
+        }
+        let name = prompt("Full name:", u.name);
+        if (!name || !name.trim()) return;
+        let role = prompt("Role:", u.role);
+        if (!role || !role.trim()) return;
+        let depot = prompt("Assigned depot:", u.depot || "") ?? u.depot;
+        let old = u.id;
+        u.id = id.trim();
+        u.name = name.trim();
+        u.role = role.trim();
+        u.depot = depot.trim();
+        db.tasks.forEach((t) => {
+          if (t.assigned === old) {
+            t.assigned = u.id;
+            t.assignedName = u.name;
+          }
+        });
+        audit("User updated", old + " → " + u.id + " / " + u.name);
+        save();
+        render("setup");
+      }
+      function toggleUser(i) {
+        if (!canAdmin()) return;
+        db.users[i].active = !db.users[i].active;
+        audit(
+          db.users[i].active ? "User reactivated" : "User deactivated",
+          db.users[i].id + " / " + db.users[i].name,
+        );
+        save();
+        render("setup");
+      }
+      function exportCSV() {
+        let rows = [
+          [
+            "Task ID",
+            "Task",
+            "Depot",
+            "Occurrence",
+            "Scheduled date",
+            "Due time",
+            "Frequency",
+            "Employee login ID",
+            "Employee name",
+            "Status",
+            "Completion time",
+            "Remarks",
+            "Evidence file",
+            "Evidence type",
+            "Verified by",
+            "Verification time",
+          ],
+        ];
+        db.records.forEach((r) =>
+          rows.push([
+            r.taskId,
+            r.taskName,
+            r.depot,
+            r.occurrence,
+            r.date,
+            r.dueTime,
+            r.frequency,
+            r.employeeId,
+            r.employeeName,
+            r.status,
+            r.completedAt || "",
+            r.remarks || "",
+            r.evidenceFile?.name || "",
+            r.evidenceFile?.type || "",
+            r.verifiedBy || "",
+            r.verifiedAt || "",
+          ]),
+        );
+        let csv = rows
+          .map((r) =>
+            r
+              .map((v) => '"' + String(v ?? "").replace(/"/g, '""') + '"')
+              .join(","),
+          )
+          .join("\r\n");
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+        );
+        a.download = "depot-task-trial-report.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+      document.querySelectorAll(".navbtn").forEach((b) =>
+        b.addEventListener("click", () => {
+          editingId = null;
+          render(b.dataset.page);
+        }),
+      );
+      function showLoggedIn() {
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("appLayout").style.display = "grid";
+        document.getElementById("sessionControls").style.display = "flex";
+        document.getElementById("sessionLabel").textContent =
+          activeUser.name + " · " + activeUser.id + " · " + activeUser.role;
+        document
+          .querySelectorAll(".navbtn")
+          .forEach(
+            (b) =>
+              (b.style.display = pageAllowed(b.dataset.page)
+                ? "block"
+                : "none"),
+          );
+        render("dashboard");
+      }
+      function logout() {
+        activeUser = null;
+        sessionStorage.removeItem("depotOpsTrialSession");
+        document.getElementById("appLayout").style.display = "none";
+        document.getElementById("sessionControls").style.display = "none";
+        document.getElementById("loginScreen").style.display = "flex";
+        document.getElementById("password").value = "";
+        document.getElementById("username").focus();
+      }
+      document.getElementById("loginForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        let id = document.getElementById("username").value.trim(),
+          pw = document.getElementById("password").value;
+        let found = db.users.find(
+          (x) => x.id.toLowerCase() === id.toLowerCase() && x.active,
+        );
+        if (!found || pw !== found.id) {
+          document.getElementById("loginError").textContent =
+            "Login failed. Check the username and trial password, or ask the administrator to reactivate the account.";
+          return;
+        }
+        activeUser = {
+          id: found.id,
+          name: found.name,
+          role: found.role,
+          depot: found.depot || "",
+        };
+        sessionStorage.setItem("depotOpsTrialSession", activeUser.id);
+        audit("Login", "User signed in");
+        save();
+        showLoggedIn();
+      });
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (activeUser?.role !== "Administrator") {
+          toast("Administrator access required.");
+          return;
+        }
+        if (
+          confirm(
+            "Reset all prototype data in this browser and restore sample tasks, depots and users?",
+          )
+        ) {
+          db = seed();
+          for (const du of demoAccounts)
+            if (!db.users.some((x) => x.id === du.id)) db.users.push(du);
+          save();
+          activeUser = { ...db.users.find((x) => x.id === "ADMIN001") };
+          sessionStorage.setItem("depotOpsTrialSession", activeUser.id);
+          editingId = null;
+          showLoggedIn();
+          toast("Demo data reset.");
+        }
+      });
+      // Restore the current demo session after a refresh in the same tab.
+      const savedSession = sessionStorage.getItem("depotOpsTrialSession");
+      if (savedSession) {
+        const found = db.users.find((x) => x.id === savedSession && x.active);
+        if (found) {
+          activeUser = {
+            id: found.id,
+            name: found.name,
+            role: found.role,
+            depot: found.depot || "",
+          };
+          showLoggedIn();
+        } else logout();
+      } else {
+        document.getElementById("loginScreen").style.display = "flex";
+      }
+    </script>
+  </body>
+</html>
